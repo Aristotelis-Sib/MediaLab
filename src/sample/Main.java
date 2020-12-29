@@ -8,10 +8,10 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage){
         BattleshipGame battleshipgame = new BattleshipGame();
         Scene scene = new Scene(battleshipgame.createContent());
-        primaryStage.setTitle("Battleship");
+        primaryStage.setTitle("MediaLab Battleship");
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
         primaryStage.show();

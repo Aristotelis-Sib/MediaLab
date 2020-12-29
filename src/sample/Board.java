@@ -14,7 +14,7 @@ import javafx.scene.shape.Rectangle;
 
 public class Board extends Parent {
     private VBox rows = new VBox();
-    private boolean enemy = false;
+    private boolean enemy ;
     public int ships = 5;
 
     public Board(boolean enemy, EventHandler<? super MouseEvent> handler) {
@@ -35,7 +35,7 @@ public class Board extends Parent {
 
     public boolean placeShip(Ship ship, int x, int y) {
         if (canPlaceShip(ship, x, y)) {
-            int length = ship.type;
+            int length = ship.length;
 
             if (ship.vertical) {
                 for (int i = y; i < y + length; i++) {
@@ -57,7 +57,6 @@ public class Board extends Parent {
                     }
                 }
             }
-
             return true;
         }
 
@@ -73,10 +72,16 @@ public class Board extends Parent {
                 new Point2D(x - 1, y),
                 new Point2D(x + 1, y),
                 new Point2D(x, y - 1),
-                new Point2D(x, y + 1)
+                new Point2D(x, y + 1),
+//              Not sure if needed
+                new Point2D(x-1, y-1),
+                new Point2D(x+1, y - 1),
+                new Point2D(x-1, y + 1),
+                new Point2D(x+1, y + 1)
+
         };
 
-        List<Cell> neighbors = new ArrayList<Cell>();
+        List<Cell> neighbors = new ArrayList<>();
 
         for (Point2D p : points) {
             if (isValidPoint(p)) {
@@ -88,22 +93,25 @@ public class Board extends Parent {
     }
 
     private boolean canPlaceShip(Ship ship, int x, int y) {
-        int length = ship.type;
+        int length = ship.length;
 
         if (ship.vertical) {
             for (int i = y; i < y + length; i++) {
                 if (!isValidPoint(x, i))
+//                    OversizeException
                     return false;
 
                 Cell cell = getCell(x, i);
                 if (cell.ship != null)
+//                  OverlayException
                     return false;
 
                 for (Cell neighbor : getNeighbors(x, i)) {
-                    if (!isValidPoint(x, i))
-                        return false;
+//                    if (!isValidPoint(x, i))
+//                        return false;
 
                     if (neighbor.ship != null)
+//                      AdjacentTilesException
                         return false;
                 }
             }
@@ -111,17 +119,20 @@ public class Board extends Parent {
         else {
             for (int i = x; i < x + length; i++) {
                 if (!isValidPoint(i, y))
+//                    OversizeException
                     return false;
 
                 Cell cell = getCell(i, y);
                 if (cell.ship != null)
+//                  OverlayException
                     return false;
 
                 for (Cell neighbor : getNeighbors(i, y)) {
-                    if (!isValidPoint(i, y))
-                        return false;
+//                    if (!isValidPoint(i, y))
+//                        return false;
 
                     if (neighbor.ship != null)
+//                      AdjacentTilesException
                         return false;
                 }
             }
