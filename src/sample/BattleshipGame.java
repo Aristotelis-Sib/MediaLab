@@ -1,208 +1,102 @@
 package sample;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 
-import java.util.*;
-
-import sample.Board.Cell;
+import java.text.DecimalFormat;
 
 public class BattleshipGame {
-//    protected enemyLastMove lastMove =new enemyLastMove();
-//    protected enemyLastMove preLastMove=new enemyLastMove();
-
-    protected Deque<Cell> enemyStack= new ArrayDeque<>();
-    protected Deque<Cell> playerStack= new ArrayDeque<>();
-
-    protected boolean running = false;
-    protected Board enemyBoard, playerBoard;
-
-    protected int shipsToPlace = 5;
-
-    protected boolean enemyTurn = false;
-
-    protected Random random = new Random();
-
     protected Parent createContent() {
         BorderPane root = new BorderPane();
         root.setPrefSize(600, 800);
 
-        root.setRight(new Text("RIGHT SIDEBAR - CONTROLS"));
-
-        enemyBoard = new Board(true, event -> {
-            if (!running)
-                return;
-
-            Board.Cell cell = (Board.Cell) event.getSource();
-            if (cell.wasShot)
-                return;
-
-            cell.shoot();
-            enemyTurn = true;
-            if (enemyBoard.ships == 0) {
-                System.out.println("YOU WIN");
-                System.exit(0);
-            }
-
-            if (enemyTurn) {
-                enemyMove();
-                enemyTurn = false;
-            }
-
-        });
-
-        playerBoard = new Board(false, event -> {
-        });
-
-//      Text box to choose layouts
-
-        ReadFile readFile=new ReadFile();
-        String[][] strArray=readFile.readFile2Array(false,1);
-        int[] count=new int[5];
-        for(int i=0;i<5;i++) {
-            playerBoard.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
-            count[Integer.parseInt(strArray[i][0])-1]=1;
-        }
-        if (Arrays.stream(count).sum()<5){
-//      InvalidCountException
-            System.out.println("InvalidCountException");
-        }
-
-        strArray=readFile.readFile2Array(true,1);
-        count=new int[5];
-        for(int i=0;i<5;i++) {
-            enemyBoard.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
-            count[Integer.parseInt(strArray[i][0])-1]=1;
-        }
-        if (Arrays.stream(count).sum()<5){
-//      InvalidCountException
-            System.out.println("InvalidCountException");
-        }
-
 //      Start Game
-        running = true;
+        Moves game = new Moves();
 
-        VBox vbox = new VBox(50, enemyBoard, playerBoard);
+        Board playerBoard=game.getPlayerBoard();
+        Board enemyBoard=game.getEnemyBoard();
+
+
+
+        HBox vbox = new HBox(50,playerBoard ,enemyBoard);
+        game.running = true;
         vbox.setAlignment(Pos.CENTER);
-
         root.setCenter(vbox);
+        int num1=game.getEnemyShips();
+        root.setTop(getStats(game));
+
+        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent e) {
+                root.setTop(getStats(game));
+            }
+        };
+        root.addEventFilter( MouseEvent.ANY, eventHandler);
 
         return root;
     }
-// Fix this to be more smart
-    private void enemyMove() {
-        boolean lastShotHit,first=true;
-//        int remainShips=playerBoard.ships;
-        Iterator<Cell> itr = enemyStack.iterator();
-        Cell preLastMove=null;
-        Cell lastMove = null;
-        if(!itr.hasNext()) {
-            lastShotHit = false;
+
+    public VBox getStats(Moves game){
+
+        double gridWidth = 150;
+        double gridHeight = 50;
+
+        DecimalFormat dc = new DecimalFormat("0.00");
+        Color infoColor=Color.BLUE;
+        Color dataColor=Color.WHITE;
+        MyNode info0= new MyNode( "Game Stats", gridWidth*1.4, gridHeight,infoColor);
+        MyNode info1 = new MyNode( "Active Ships", gridWidth, gridHeight,infoColor);
+        MyNode info2 = new MyNode( "Points" ,gridWidth, gridHeight,infoColor);
+        MyNode info3 = new MyNode( "Hit acc",gridWidth, gridHeight,infoColor);
+
+        MyNode player1 = new MyNode( "Player", gridWidth*1.4, gridHeight,infoColor);
+        MyNode player2 = new MyNode(String.valueOf(game.getPlayerShips()) , gridWidth, gridHeight,dataColor);
+        MyNode player3 = new MyNode(String.valueOf(game.getPlayerPoints()) ,gridWidth, gridHeight,dataColor);
+        MyNode player4 = new MyNode(String.valueOf(dc.format(game.getPlayerAcc())) ,gridWidth, gridHeight,dataColor);
+
+        MyNode computer1 = new MyNode( "Computer", gridWidth*1.4, gridHeight,infoColor);
+        MyNode computer2 = new MyNode( String.valueOf(game.getEnemyShips()) , gridWidth, gridHeight,dataColor);
+        MyNode computer3 = new MyNode( String.valueOf(game.getEnemyPoints()) ,gridWidth, gridHeight,dataColor);
+        MyNode computer4 = new MyNode( String.valueOf(dc.format(game.getEnemyAcc())) ,gridWidth, gridHeight,dataColor);
+
+        HBox info = new HBox( info0,info1,info2,info3);
+        HBox player = new HBox( player1,player2,player3,player4);
+        HBox computer = new HBox( computer1,computer2,computer3,computer4);
+        VBox VBoxStats = new VBox(info,player,computer);
+
+        return VBoxStats;
+    }
+
+    public static class MyNode extends StackPane {
+        public MyNode(){
+
         }
-        else {
-            lastMove=itr.next();
-            lastShotHit = !(lastMove.points == 0);
-            if(itr.hasNext()) {
-                preLastMove = itr.next();
-            }
-        }
 
-        while (enemyTurn) {
-            if (lastShotHit){
-                if(preLastMove!=null && !(preLastMove.points==0)){
-                    Board.Cell cell=null;
-                    if (preLastMove.x==lastMove.x){
-                        if (first) {
-                            first = false;
-                            if(playerBoard.isValidPoint(preLastMove.x, Math.max(preLastMove.y, lastMove.y) + 1))
-                                cell = playerBoard.getCell(preLastMove.x, Math.max(preLastMove.y, lastMove.y) + 1);
-                            else continue;
+        public MyNode( String name,double width, double height,Color color ) {
 
-                        }
-                        else{
-                            lastShotHit=false;
-                            if(playerBoard.isValidPoint(preLastMove.x, Math.min(preLastMove.y, lastMove.y) - 1))
-                                cell = playerBoard.getCell(preLastMove.x, Math.min(preLastMove.y, lastMove.y) - 1);
-                            else continue;
-                        }
-                    }
-                    else if (preLastMove.y==lastMove.y){
-                        if (first) {
-                            first = false;
-                            if(playerBoard.isValidPoint(Math.max(preLastMove.x, lastMove.x) + 1, preLastMove.y))
-                                cell = playerBoard.getCell(Math.max(preLastMove.x, lastMove.x) + 1, preLastMove.y);
-                            else continue;
+            // create rectangle
+            Rectangle rectangle = new Rectangle( width, height);
+            rectangle.setStyle("-fx-background-color: white; -fx-border-style: solid; -fx-stroke: black; -fx-stroke-width: 2; -fx-stroke-height: 2; -fx-border-width: 30; -fx-border-color: black; -fx-min-width: 20; -fx-min-height:20; -fx-max-width:20; -fx-max-height: 20;");
+            rectangle.setFill(color);
 
-                        }
-                        else{
-                            lastShotHit = false;
-                            if(playerBoard.isValidPoint(Math.min(preLastMove.x, lastMove.x) - 1, preLastMove.y))
-                                cell = playerBoard.getCell(Math.min(preLastMove.x, lastMove.x) - 1, preLastMove.y);
-                            else continue;
-                        }
-                    }
-                    if (cell==null) {
-                        lastShotHit=false;
-                        continue;
-                    }
-                    if (cell.wasShot)
-                        continue;
-//
-                    cell.shoot();
-                    enemyStack.addFirst(cell);
-                    break;
-                }
-                else{
-                    for (Cell neighbor : playerBoard.getNeighbors(lastMove.x,lastMove.y)) {
-                        if (!neighbor.wasShot) {
-                            neighbor.shoot();
-                            enemyStack.addFirst(neighbor);
-                            break;
-                        }
-                    }
-                    lastShotHit=false;
-                }
-            }
-            else {
-                int x = random.nextInt(10);
-                int y = random.nextInt(10);
+            // create label
+            Label label = new Label( name);
+            label.setFont(new Font("Arial", 18));
+            label.setStyle("-fx-font-weight: bold;");
+            getChildren().addAll( rectangle, label);
 
-                Board.Cell cell = playerBoard.getCell(x, y);
-                if (cell.wasShot)
-                    continue;
-
-                cell.shoot();
-                enemyStack.addFirst(cell);
-            }
-
-            enemyTurn = false;
-
-            if (playerBoard.ships == 0) {
-                System.out.println("YOU LOSE");
-                System.exit(0);
-            }
         }
     }
-//    public class enemyLastMove{
-//        public int x;
-//        public int y;
-//        public boolean shot;
-//        public String shipType;
-//
-//        public enemyLastMove(){
-//           this.x=0;
-//           this.y=0;
-//           this.shot=false;
-////           this.shipType="0";
-//        }
-//        public enemyLastMove(int x,int y,boolean shot){   //,String type){
-//            this.x=x;
-//            this.y=y;
-//            this.shot=shot;
-////            this.shipType=type;
-//        }
-//    }
+
+
 }
