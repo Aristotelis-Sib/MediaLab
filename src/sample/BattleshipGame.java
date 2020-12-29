@@ -37,15 +37,18 @@ public class BattleshipGame {
             if (cell.wasShot)
                 return;
 
-            enemyTurn = !cell.shoot();
-
+            cell.shoot();
+            enemyTurn = true;
             if (enemyBoard.ships == 0) {
                 System.out.println("YOU WIN");
                 System.exit(0);
             }
 
-            if (enemyTurn)
+            if (enemyTurn) {
                 enemyMove();
+                enemyTurn = false;
+            }
+
         });
 
         playerBoard = new Board(false, event -> {
@@ -53,6 +56,7 @@ public class BattleshipGame {
                 return;
 
             Board.Cell cell = (Board.Cell) event.getSource();
+
             if (playerBoard.placeShip(new Ship(shipsToPlace, event.getButton() == MouseButton.PRIMARY), cell.x, cell.y)) {
                 if (--shipsToPlace == 0) {
                     startGame();
@@ -67,7 +71,7 @@ public class BattleshipGame {
 
         return root;
     }
-
+// Fix this to be more smart
     private void enemyMove() {
         while (enemyTurn) {
             int x = random.nextInt(10);
@@ -77,7 +81,8 @@ public class BattleshipGame {
             if (cell.wasShot)
                 continue;
 
-            enemyTurn = cell.shoot();
+            cell.shoot();
+            enemyTurn =false;
 
             if (playerBoard.ships == 0) {
                 System.out.println("YOU LOSE");
