@@ -74,10 +74,10 @@ public class Board extends Parent {
                 new Point2D(x, y - 1),
                 new Point2D(x, y + 1),
 //              Not sure if needed
-                new Point2D(x-1, y-1),
-                new Point2D(x+1, y - 1),
-                new Point2D(x-1, y + 1),
-                new Point2D(x+1, y + 1)
+//                new Point2D(x-1, y-1),
+//                new Point2D(x+1, y - 1),
+//                new Point2D(x-1, y + 1),
+//                new Point2D(x+1, y + 1)
 
         };
 
@@ -153,7 +153,7 @@ public class Board extends Parent {
         public int x, y;
         public Ship ship = null;
         public boolean wasShot = false;
-
+        public int points=0;
         private Board board;
 
         public Cell(int x, int y, Board board) {
@@ -170,14 +170,13 @@ public class Board extends Parent {
             setFill(Color.BLACK);
 
             if (ship != null) {
-                ship.hit();
+                this.points=ship.hit();
                 setFill(Color.RED);
                 if (!ship.isAlive()) {
                     board.ships--;
                 }
                 return true;
             }
-
             return false;
         }
     }

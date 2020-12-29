@@ -2,20 +2,21 @@ package sample;
 
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 import sample.Board.Cell;
 
-
 public class BattleshipGame {
-    protected enemyLastMove lastMove =new enemyLastMove();
-    protected enemyLastMove preLastMove=new enemyLastMove();
+//    protected enemyLastMove lastMove =new enemyLastMove();
+//    protected enemyLastMove preLastMove=new enemyLastMove();
+
+    protected Deque<Cell> enemyStack= new ArrayDeque<>();
+    protected Deque<Cell> playerStack= new ArrayDeque<>();
+
     protected boolean running = false;
     protected Board enemyBoard, playerBoard;
 
@@ -93,33 +94,77 @@ public class BattleshipGame {
     }
 // Fix this to be more smart
     private void enemyMove() {
-        boolean shotHit,lastShotHit;
-        int remainShips=playerBoard.ships;
-        lastShotHit=this.lastMove.shot;
+        boolean lastShotHit,first=true;
+//        int remainShips=playerBoard.ships;
+        Iterator<Cell> itr = enemyStack.iterator();
+        Cell preLastMove=null;
+        Cell lastMove = null;
+        if(!itr.hasNext()) {
+            lastShotHit = false;
+        }
+        else {
+            lastMove=itr.next();
+            lastShotHit = !(lastMove.points == 0);
+            if(itr.hasNext()) {
+                preLastMove = itr.next();
+            }
+        }
+
         while (enemyTurn) {
             if (lastShotHit){
-//                if(this.preLastMove.shot){
+                if(preLastMove!=null && !(preLastMove.points==0)){
+                    Board.Cell cell=null;
+                    if (preLastMove.x==lastMove.x){
+                        if (first) {
+                            first = false;
+                            if(playerBoard.isValidPoint(preLastMove.x, Math.max(preLastMove.y, lastMove.y) + 1))
+                                cell = playerBoard.getCell(preLastMove.x, Math.max(preLastMove.y, lastMove.y) + 1);
+                            else continue;
 
-//                }
-//                else{
-                    Board.Cell cell = playerBoard.getCell(this.lastMove.x,this.lastMove.y);
-                    for (Cell neighbor : playerBoard.getNeighbors(this.lastMove.x,this.lastMove.y)) {
-                        if (neighbor.wasShot) {
-                            continue;
                         }
                         else{
-                            shotHit=neighbor.shoot();
-                            this.preLastMove=this.lastMove;
-                            if (remainShips>playerBoard.ships)
-                                this.lastMove=new enemyLastMove(neighbor.x, neighbor.y,!shotHit);
-                            else
-                                this.lastMove=new enemyLastMove(neighbor.x, neighbor.y,shotHit);
+                            lastShotHit=false;
+                            if(playerBoard.isValidPoint(preLastMove.x, Math.min(preLastMove.y, lastMove.y) - 1))
+                                cell = playerBoard.getCell(preLastMove.x, Math.min(preLastMove.y, lastMove.y) - 1);
+                            else continue;
+                        }
+                    }
+                    else if (preLastMove.y==lastMove.y){
+                        if (first) {
+                            first = false;
+                            if(playerBoard.isValidPoint(Math.max(preLastMove.x, lastMove.x) + 1, preLastMove.y))
+                                cell = playerBoard.getCell(Math.max(preLastMove.x, lastMove.x) + 1, preLastMove.y);
+                            else continue;
 
+                        }
+                        else{
+                            lastShotHit = false;
+                            if(playerBoard.isValidPoint(Math.min(preLastMove.x, lastMove.x) - 1, preLastMove.y))
+                                cell = playerBoard.getCell(Math.min(preLastMove.x, lastMove.x) - 1, preLastMove.y);
+                            else continue;
+                        }
+                    }
+                    if (cell==null) {
+                        lastShotHit=false;
+                        continue;
+                    }
+                    if (cell.wasShot)
+                        continue;
+//
+                    cell.shoot();
+                    enemyStack.addFirst(cell);
+                    break;
+                }
+                else{
+                    for (Cell neighbor : playerBoard.getNeighbors(lastMove.x,lastMove.y)) {
+                        if (!neighbor.wasShot) {
+                            neighbor.shoot();
+                            enemyStack.addFirst(neighbor);
                             break;
                         }
                     }
                     lastShotHit=false;
-//                }
+                }
             }
             else {
                 int x = random.nextInt(10);
@@ -129,10 +174,10 @@ public class BattleshipGame {
                 if (cell.wasShot)
                     continue;
 
-                shotHit=cell.shoot();
-                this.preLastMove=this.lastMove;
-                this.lastMove=new enemyLastMove(cell.x,cell.y,shotHit);
+                cell.shoot();
+                enemyStack.addFirst(cell);
             }
+
             enemyTurn = false;
 
             if (playerBoard.ships == 0) {
@@ -141,23 +186,23 @@ public class BattleshipGame {
             }
         }
     }
-    public class enemyLastMove{
-        public int x;
-        public int y;
-        public boolean shot;
-        public String shipType;
-
-        public enemyLastMove(){
-           this.x=0;
-           this.y=0;
-           this.shot=false;
-//           this.shipType="0";
-        }
-        public enemyLastMove(int x,int y,boolean shot){   //,String type){
-            this.x=x;
-            this.y=y;
-            this.shot=shot;
-//            this.shipType=type;
-        }
-    }
+//    public class enemyLastMove{
+//        public int x;
+//        public int y;
+//        public boolean shot;
+//        public String shipType;
+//
+//        public enemyLastMove(){
+//           this.x=0;
+//           this.y=0;
+//           this.shot=false;
+////           this.shipType="0";
+//        }
+//        public enemyLastMove(int x,int y,boolean shot){   //,String type){
+//            this.x=x;
+//            this.y=y;
+//            this.shot=shot;
+////            this.shipType=type;
+//        }
+//    }
 }
