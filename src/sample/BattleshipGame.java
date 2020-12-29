@@ -7,13 +7,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import sample.Board.Cell;
 
 
 public class BattleshipGame {
-
+    protected enemyLastMove lastMove =new enemyLastMove();
+    protected enemyLastMove preLastMove=new enemyLastMove();
     protected boolean running = false;
     protected Board enemyBoard, playerBoard;
 
@@ -52,17 +54,35 @@ public class BattleshipGame {
         });
 
         playerBoard = new Board(false, event -> {
-            if (running)
-                return;
-
-            Board.Cell cell = (Board.Cell) event.getSource();
-
-            if (playerBoard.placeShip(new Ship(shipsToPlace, event.getButton() == MouseButton.PRIMARY), cell.x, cell.y)) {
-                if (--shipsToPlace == 0) {
-                    startGame();
-                }
-            }
         });
+
+//      Text box to choose layouts
+
+        ReadFile readFile=new ReadFile();
+        String[][] strArray=readFile.readFile2Array(false,1);
+        int[] count=new int[5];
+        for(int i=0;i<5;i++) {
+            playerBoard.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
+            count[Integer.parseInt(strArray[i][0])-1]=1;
+        }
+        if (Arrays.stream(count).sum()<5){
+//      InvalidCountException
+            System.out.println("InvalidCountException");
+        }
+
+        strArray=readFile.readFile2Array(true,1);
+        count=new int[5];
+        for(int i=0;i<5;i++) {
+            enemyBoard.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
+            count[Integer.parseInt(strArray[i][0])-1]=1;
+        }
+        if (Arrays.stream(count).sum()<5){
+//      InvalidCountException
+            System.out.println("InvalidCountException");
+        }
+
+//      Start Game
+        running = true;
 
         VBox vbox = new VBox(50, enemyBoard, playerBoard);
         vbox.setAlignment(Pos.CENTER);
@@ -73,16 +93,47 @@ public class BattleshipGame {
     }
 // Fix this to be more smart
     private void enemyMove() {
+        boolean shotHit,lastShotHit;
+        int remainShips=playerBoard.ships;
+        lastShotHit=this.lastMove.shot;
         while (enemyTurn) {
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
+            if (lastShotHit){
+//                if(this.preLastMove.shot){
 
-            Board.Cell cell = playerBoard.getCell(x, y);
-            if (cell.wasShot)
-                continue;
+//                }
+//                else{
+                    Board.Cell cell = playerBoard.getCell(this.lastMove.x,this.lastMove.y);
+                    for (Cell neighbor : playerBoard.getNeighbors(this.lastMove.x,this.lastMove.y)) {
+                        if (neighbor.wasShot) {
+                            continue;
+                        }
+                        else{
+                            shotHit=neighbor.shoot();
+                            this.preLastMove=this.lastMove;
+                            if (remainShips>playerBoard.ships)
+                                this.lastMove=new enemyLastMove(neighbor.x, neighbor.y,!shotHit);
+                            else
+                                this.lastMove=new enemyLastMove(neighbor.x, neighbor.y,shotHit);
 
-            cell.shoot();
-            enemyTurn =false;
+                            break;
+                        }
+                    }
+                    lastShotHit=false;
+//                }
+            }
+            else {
+                int x = random.nextInt(10);
+                int y = random.nextInt(10);
+
+                Board.Cell cell = playerBoard.getCell(x, y);
+                if (cell.wasShot)
+                    continue;
+
+                shotHit=cell.shoot();
+                this.preLastMove=this.lastMove;
+                this.lastMove=new enemyLastMove(cell.x,cell.y,shotHit);
+            }
+            enemyTurn = false;
 
             if (playerBoard.ships == 0) {
                 System.out.println("YOU LOSE");
@@ -90,21 +141,23 @@ public class BattleshipGame {
             }
         }
     }
+    public class enemyLastMove{
+        public int x;
+        public int y;
+        public boolean shot;
+        public String shipType;
 
-    private void startGame() {
-        // place enemy ships
-        int type = 5;
-
-        while (type > 0) {
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
-
-            if (enemyBoard.placeShip(new Ship(type, Math.random() < 0.5), x, y)) {
-                type--;
-            }
+        public enemyLastMove(){
+           this.x=0;
+           this.y=0;
+           this.shot=false;
+//           this.shipType="0";
         }
-
-        running = true;
+        public enemyLastMove(int x,int y,boolean shot){   //,String type){
+            this.x=x;
+            this.y=y;
+            this.shot=shot;
+//            this.shipType=type;
+        }
     }
-
 }
