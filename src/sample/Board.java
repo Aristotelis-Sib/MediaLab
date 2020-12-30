@@ -1,7 +1,5 @@
 package sample;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +16,7 @@ public class Board extends Parent {
     private VBox rows = new VBox();
     protected boolean enemy ;
     public int ships = 5;
-
+    public Ship[] shipArray =new Ship[5];
 
     public Board(boolean enemy, EventHandler<? super MouseEvent> handler) {
         this.enemy = enemy;
@@ -34,8 +32,6 @@ public class Board extends Parent {
 
         getChildren().add(rows);
     }
-
-
     public boolean placeShip(Ship ship, int x, int y) {
         if (canPlaceShip(ship, x, y)) {
             int length = ship.length;
@@ -60,6 +56,7 @@ public class Board extends Parent {
                     }
                 }
             }
+            shipArray[Integer.parseInt(ship.type)-1]=ship;
             return true;
         }
 
@@ -110,8 +107,6 @@ public class Board extends Parent {
                     return false;
 
                 for (Cell neighbor : getNeighbors(x, i)) {
-//                    if (!isValidPoint(x, i))
-//                        return false;
 
                     if (neighbor.ship != null)
 //                      AdjacentTilesException
@@ -131,8 +126,6 @@ public class Board extends Parent {
                     return false;
 
                 for (Cell neighbor : getNeighbors(i, y)) {
-//                    if (!isValidPoint(i, y))
-//                        return false;
 
                     if (neighbor.ship != null)
 //                      AdjacentTilesException
@@ -153,6 +146,7 @@ public class Board extends Parent {
     }
 
     public void reset(boolean total){
+        this.ships=5;
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 Cell c = this.getCell(x,y);

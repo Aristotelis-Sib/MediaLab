@@ -4,7 +4,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
 
-import static sample.Popup.display;
+import static sample.Popup.displayResults;
 
 //maybe class static or functions/vars
 public class Moves {
@@ -14,21 +14,14 @@ public class Moves {
     protected static Board enemyBoard, playerBoard;
     protected boolean enemyTurn = false;
     protected Random random = new Random();
-
+    private PropertyChangeSupport support= new PropertyChangeSupport(this);
+    private int numOfMoves=5;
+    public static String id;
     public int getPlayerShips(){
         return playerBoard.ships;
     }
     public int getEnemyShips(){
         return enemyBoard.ships;
-    }
-    private PropertyChangeSupport support= new PropertyChangeSupport(this);
-
-
-    public Deque<Board.Cell> getEnemyStack(){
-        return enemyStack;
-    }
-    public Deque<Board.Cell> getPlayerStack(){
-        return playerStack;
     }
 
     public int getPlayerPoints(){
@@ -81,7 +74,20 @@ public class Moves {
         support.firePropertyChange("0", this.running,"0");
     }
 
-    public Board getEnemyBoard() {
+    public void setRandomPlayer(){
+//        0--> player starts 1--> enemy starts
+        int player= random.nextInt(2);
+        if (player==0){
+            enemyTurn=false;
+            Popup.whoPlays("You start the game!");
+        }
+        else{
+            enemyTurn=true;
+            Popup.whoPlays("Enemy starts the game!");
+            enemyMove();
+        }
+    }
+    public void createEnemyBoard() {
         enemyBoard = new Board(true, event -> {
 
             if (!running)
@@ -94,38 +100,34 @@ public class Moves {
             cell.shoot();
             enemyTurn = true;
             playerStack.addFirst(cell);
-            observer();
             if (enemyBoard.ships == 0) {
-                display("YOU WON");
-                enemyBoard.reset(false);
-                playerBoard.reset(false);
-                enemyTurn = false;
-//                  System.exit(0);
-            }
-            if (playerStack.size() == 40) {
-                display(getPlayerPoints() > getEnemyPoints() ? "YOU WON" : "YOU LOST");
-                enemyBoard.reset(true);
-                playerBoard.reset(true);
+                displayResults("YOU WON",getPlayerPoints(),getEnemyPoints());
+                initBoard(enemyBoard,"1");
+                initBoard(playerBoard,"1");
                 reset();
-                enemyTurn = false;
+                setRandomPlayer();
             }
-
+            if (playerStack.size() == numOfMoves) {
+                displayResults(getPlayerPoints() > getEnemyPoints() ? "YOU WON" : "YOU LOST",getPlayerPoints(),getEnemyPoints());
+                initBoard(enemyBoard,"1");
+                initBoard(playerBoard,"1");
+                reset();
+                setRandomPlayer();
+            }
+            observer();
             if (enemyTurn) {
                 enemyMove();
                 enemyTurn = false;
             }
         });
-
-        return enemyBoard;
     }
 
-    public Board getPlayerBoard(){
+    public void createPlayerBoard(){
         playerBoard = new Board(false, event -> {});
-        return playerBoard;
     }
-    public void initBoard(Board board,int id){
+    public void initBoard(Board board,String id){
+        board.reset(true);
         ReadFile readFile=new ReadFile();
-        System.out.println("ID IS"+id);
         String[][] strArray=readFile.readFile2Array(board.enemy, id);
         int[] count=new int[5];
         for(int i=0;i<5;i++) {
@@ -228,13 +230,21 @@ public class Moves {
                 enemyStack.addFirst(cell);
             }
             observer();
-            if (enemyStack.size()==40){
-                display(getPlayerPoints()>getEnemyPoints()?"YOU WON":"YOU LOST");
+            if (enemyStack.size()==numOfMoves){
+                displayResults(getPlayerPoints() > getEnemyPoints() ? "YOU WON" : "YOU LOST",getPlayerPoints(),getEnemyPoints());
+                initBoard(enemyBoard,"1");
+                initBoard(playerBoard,"1");
+                reset();
+                setRandomPlayer();
             }
             enemyTurn = false;
 
             if (playerBoard.ships == 0) {
-                display("YOU LOST");
+                displayResults("YOU LOST",getPlayerPoints(),getEnemyPoints());
+                initBoard(enemyBoard,"1");
+                initBoard(playerBoard,"1");
+                reset();
+                setRandomPlayer();
             }
         }
 

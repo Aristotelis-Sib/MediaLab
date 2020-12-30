@@ -8,15 +8,15 @@ public class ReadFile {
 
     }
 
-    public String[][] readFile2Array (boolean enemy, int id){
+    public String[][] readFile2Array (boolean enemy, String id){
         String sid;
         String path;
 
-        if (id<10){
+        if (Integer.parseInt(id)<10){
             sid="0"+ id;
         }
         else{
-            sid=String.valueOf(id);
+            sid=id;
         }
         if (enemy) {
             path ="src/sample/enemy_SCENARIO-"+sid+".txt";

@@ -10,6 +10,10 @@ public class Ship extends Parent {
     public  String type;
     private int health;
 
+    public int getHealth(){
+        return health;
+    }
+
     public Ship(String type, boolean vertical) {
         this.type=type;
         this.vertical = vertical;
