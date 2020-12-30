@@ -1,10 +1,8 @@
 package sample;
 
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -13,36 +11,27 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
 
 public class BattleshipGame {
+
+    protected BorderPane root = new BorderPane();
+    protected Moves game=new Moves();
     protected Parent createContent() {
-        BorderPane root = new BorderPane();
+
         root.setPrefSize(600, 800);
-
-//      Start Game
-        Moves game = new Moves();
-
         Board playerBoard=game.getPlayerBoard();
+        game.initBoard(playerBoard,1);
         Board enemyBoard=game.getEnemyBoard();
-
-
-
+        game.initBoard(enemyBoard,1);
+        root.setTop(getStats(game));
         HBox vbox = new HBox(50,playerBoard ,enemyBoard);
         game.running = true;
         vbox.setAlignment(Pos.CENTER);
         root.setCenter(vbox);
-        int num1=game.getEnemyShips();
-        root.setTop(getStats(game));
-
-        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent e) {
-                root.setTop(getStats(game));
-            }
-        };
-        root.addEventFilter( MouseEvent.ANY, eventHandler);
-
+        game.addPropertyChangeListener(new listener());
         return root;
     }
 
@@ -98,5 +87,9 @@ public class BattleshipGame {
         }
     }
 
-
+    public class listener implements PropertyChangeListener {
+        public void propertyChange(PropertyChangeEvent evt) {
+            root.setTop(getStats(game));
+        }
+    }
 }

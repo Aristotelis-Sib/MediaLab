@@ -15,8 +15,8 @@ public class Popup {
         popUpWindow.initModality(Modality.APPLICATION_MODAL);
         popUpWindow.setTitle("This is a pop up window");
         Label label1= new Label(winner);
-        Button button1= new Button("Close this pop up window");
-        button1.setOnAction(e -> popUpWindow.close());
+        Button button1= new Button("Close Game");
+        button1.setOnAction(e ->{System.exit(0);});
         VBox layout= new VBox(10);
         layout.getChildren().addAll(label1, button1);
         layout.setAlignment(Pos.CENTER);

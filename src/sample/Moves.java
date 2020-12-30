@@ -1,13 +1,7 @@
 package sample;
 
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 
 import static sample.Popup.display;
@@ -17,7 +11,7 @@ public class Moves {
     protected  Deque<Board.Cell> enemyStack= new ArrayDeque<>();
     protected  Deque<Board.Cell> playerStack= new ArrayDeque<>();
     protected boolean running = false;
-    protected  Board enemyBoard, playerBoard;
+    protected static Board enemyBoard, playerBoard;
     protected boolean enemyTurn = false;
     protected Random random = new Random();
 
@@ -27,6 +21,8 @@ public class Moves {
     public int getEnemyShips(){
         return enemyBoard.ships;
     }
+    private PropertyChangeSupport support= new PropertyChangeSupport(this);
+
 
     public Deque<Board.Cell> getEnemyStack(){
         return enemyStack;
@@ -76,9 +72,18 @@ public class Moves {
         else return count/enemyStack.size();
 
     }
-    public Board getEnemyBoard(){
-//      id parameter for reading proper txt
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void observer() {
+        support.firePropertyChange("0", this.running,"0");
+    }
+
+    public Board getEnemyBoard() {
         enemyBoard = new Board(true, event -> {
+
             if (!running)
                 return;
 
@@ -89,52 +94,53 @@ public class Moves {
             cell.shoot();
             enemyTurn = true;
             playerStack.addFirst(cell);
+            observer();
             if (enemyBoard.ships == 0) {
                 display("YOU WON");
-                System.exit(0);
+                enemyBoard.reset(false);
+                playerBoard.reset(false);
+                enemyTurn = false;
+//                  System.exit(0);
             }
-            if (playerStack.size()==40){
-                display(getPlayerPoints()>getEnemyPoints()?"YOU WON":"YOU LOST");
-                System.exit(0);
+            if (playerStack.size() == 40) {
+                display(getPlayerPoints() > getEnemyPoints() ? "YOU WON" : "YOU LOST");
+                enemyBoard.reset(true);
+                playerBoard.reset(true);
+                reset();
+                enemyTurn = false;
             }
 
             if (enemyTurn) {
                 enemyMove();
                 enemyTurn = false;
             }
-
         });
-
-        ReadFile readFile=new ReadFile();
-        String[][] strArray=readFile.readFile2Array(true,1);
-        int[] count=new int[5];
-        for(int i=0;i<5;i++) {
-            enemyBoard.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
-            count[Integer.parseInt(strArray[i][0])-1]=1;
-        }
-        if (Arrays.stream(count).sum()<5){
-//      InvalidCountException
-            System.out.println("InvalidCountException");
-        }
 
         return enemyBoard;
     }
 
     public Board getPlayerBoard(){
         playerBoard = new Board(false, event -> {});
-
+        return playerBoard;
+    }
+    public void initBoard(Board board,int id){
         ReadFile readFile=new ReadFile();
-        String[][] strArray=readFile.readFile2Array(false,1);
+        System.out.println("ID IS"+id);
+        String[][] strArray=readFile.readFile2Array(board.enemy, id);
         int[] count=new int[5];
         for(int i=0;i<5;i++) {
-            playerBoard.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
+            board.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
             count[Integer.parseInt(strArray[i][0])-1]=1;
         }
-        if (Arrays.stream(count).sum()<5){
+        if (Arrays.stream(count).sum()!=5){
 //      InvalidCountException
             System.out.println("InvalidCountException");
         }
-        return  playerBoard;
+    }
+
+    public void reset(){
+        enemyStack= new ArrayDeque<>();
+        playerStack= new ArrayDeque<>();
     }
 
     private void enemyMove() {
@@ -221,16 +227,14 @@ public class Moves {
                 cell.shoot();
                 enemyStack.addFirst(cell);
             }
-
+            observer();
             if (enemyStack.size()==40){
                 display(getPlayerPoints()>getEnemyPoints()?"YOU WON":"YOU LOST");
-                System.exit(0);
             }
             enemyTurn = false;
 
             if (playerBoard.ships == 0) {
                 display("YOU LOST");
-                System.exit(0);
             }
         }
 

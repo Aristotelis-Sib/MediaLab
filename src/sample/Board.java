@@ -1,5 +1,7 @@
 package sample;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +16,9 @@ import javafx.scene.shape.Rectangle;
 
 public class Board extends Parent {
     private VBox rows = new VBox();
-    private boolean enemy ;
+    protected boolean enemy ;
     public int ships = 5;
+
 
     public Board(boolean enemy, EventHandler<? super MouseEvent> handler) {
         this.enemy = enemy;
@@ -26,12 +29,12 @@ public class Board extends Parent {
                 c.setOnMouseClicked(handler);
                 row.getChildren().add(c);
             }
-
             rows.getChildren().add(row);
         }
 
         getChildren().add(rows);
     }
+
 
     public boolean placeShip(Ship ship, int x, int y) {
         if (canPlaceShip(ship, x, y)) {
@@ -149,6 +152,26 @@ public class Board extends Parent {
         return x >= 0 && x < 10 && y >= 0 && y < 10;
     }
 
+    public void reset(boolean total){
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                Cell c = this.getCell(x,y);
+                c.setFill(Color.LIGHTGRAY);
+                c.setStroke(Color.BLACK);
+                c.wasShot=false;
+                c.points=0;
+                if(c.ship!=null && !this.enemy && !total){
+                        c.setFill(Color.WHITE);
+                        c.setStroke(Color.GREEN);
+                }
+                if(total){
+                    c.ship=null;
+                    c.setFill(Color.LIGHTGRAY);
+                    c.setStroke(Color.BLACK);
+                }
+            }
+        }
+    }
     public class Cell extends Rectangle {
         public int x, y;
         public Ship ship = null;
