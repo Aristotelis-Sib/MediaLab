@@ -13,7 +13,7 @@ public class Main extends Application {
         Scene scene = new Scene(battleshipgame.createContent());
         primaryStage.setTitle("MediaLab Battleship");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(true);
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 

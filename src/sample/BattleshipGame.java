@@ -75,11 +75,15 @@ public class BattleshipGame {
     }
 
     public static class MyNode extends StackPane {
+
         public MyNode( String text,double width, double height,Color color ) {
+            this(text,width,height,color,2);
+        }
+        public MyNode( String text,double width, double height,Color color,int strokeWidth ) {
 
             // create rectangle
             Rectangle rectangle = new Rectangle( width, height);
-            rectangle.setStyle("-fx-border-style: solid; -fx-stroke: black; -fx-stroke-width: 2; -fx-stroke-height: 2; -fx-border-width: 3; -fx-border-height: 3; -fx-border-color: black; -fx-min-width: 20; -fx-min-height:20; -fx-max-width:20; -fx-max-height: 20;");
+            rectangle.setStyle("-fx-border-style: solid; -fx-stroke: black; -fx-stroke-width:"+strokeWidth+"; -fx-stroke-height: 2; -fx-border-width: 3; -fx-border-height: 3; -fx-border-color: black; -fx-min-width: 20; -fx-min-height:20; -fx-max-width:20; -fx-max-height: 20;");
             rectangle.setFill(color);
 
             // create label
@@ -96,13 +100,6 @@ public class BattleshipGame {
             root.setTop(topVBox);
         }
     }
-
-    private MenuItem exitMenuItem() {
-        MenuItem exitMenuItem = new MenuItem("Exit");
-        exitMenuItem.setOnAction(actionEvent -> Platform.exit());
-        return exitMenuItem;
-    }
-
     private Menu applicationMenu() {
         Menu fileMenu = new Menu("Application");
         fileMenu.setStyle("-fx-font-weight: bold; -fx-border-style: solid;-fx-border-width: 3; -fx-border-color: black");
@@ -119,8 +116,11 @@ public class BattleshipGame {
         MenuItem load = new MenuItem("Load");
         load.setOnAction(actionEvent -> displayLoad(start));
 
+        MenuItem exitMenuItem = new MenuItem("Exit");
+        exitMenuItem.setOnAction(actionEvent -> Platform.exit());
+
         fileMenu.getItems().addAll(start, load,
-                new SeparatorMenuItem(), exitMenuItem());
+                new SeparatorMenuItem(), exitMenuItem);
         return fileMenu;
     }
 

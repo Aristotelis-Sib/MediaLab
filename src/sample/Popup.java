@@ -101,8 +101,6 @@ public class Popup {
     public static void whoPlays(String toPlay)
     {
         Stage popUpWindow=new Stage();
-//        popUpWindow.initModality(Modality.WINDOW_MODAL);
-//        popUpWindow.initOwner(BattleshipGame.root.getScene().getWindow());
         popUpWindow.setMinHeight(100);
         popUpWindow.setMinWidth(200);
         popUpWindow.setTitle("Who plays?");

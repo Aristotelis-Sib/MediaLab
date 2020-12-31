@@ -3,6 +3,7 @@ package sample;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.*;
+import customExceptions.*;
 
 import static sample.Popup.displayResults;
 
@@ -131,12 +132,12 @@ public class Moves {
         String[][] strArray=readFile.readFile2Array(board.enemy, id);
         int[] count=new int[5];
         for(int i=0;i<5;i++) {
-            board.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]));
+            board.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]),id);
             count[Integer.parseInt(strArray[i][0])-1]=1;
         }
         if (Arrays.stream(count).sum()!=5){
 //      InvalidCountException
-            System.out.println("InvalidCountException");
+            throw new InvalidCountExeception(board.enemy?"enemy_":"player_"+ id+".txt throws InvalidCountExeception");
         }
     }
 
@@ -147,7 +148,6 @@ public class Moves {
 
     private void enemyMove() {
         boolean lastShotHit,first=true;
-//        int remainShips=playerBoard.ships;
         Iterator<Board.Cell> itr = enemyStack.iterator();
         Board.Cell preLastMove=null;
         Board.Cell lastMove = null;
