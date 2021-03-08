@@ -10,10 +10,6 @@ public class Ship extends Parent {
     public  String type;
     private int health;
 
-    public int getHealth(){
-        return health;
-    }
-
     public Ship(String type, boolean vertical) {
         this.type=type;
         this.vertical = vertical;
@@ -47,17 +43,39 @@ public class Ship extends Parent {
         this.length=this.health;
     }
 
+    /**
+     * Hits ship and subtracts remaining health by 1.If ship has health left returns points corresponding for hit
+     * if no more health left (ship sank) return points corresponding for hit plus points for sinking this type of ship
+     *
+     * @return int Points corresponding to hit (depends on ship type), if hit sinks the ship returns points of hit plus
+     *              points of sinking this ship type.
+     */
     public int hit() {
         health--;
         if (health>0){
             return this.hitPoints;
         }
         else{
-            return this.hitPoints+this.sinkPoints;
+            return this.hitPoints + this.sinkPoints;
         }
     }
 
+    /**
+     * Returns true if health of ship is not zero (floating ship) else returns false
+     *
+     * @return boolean true if ship has not been sank else returns false
+     */
     public boolean isAlive() {
         return health > 0;
     }
+
+    /**
+     * Returns the remaining health of the ship. That is the number of additional hits the ship can withstand.
+     *
+     * @return int remaining health of ship
+     */
+    public int getHealth(){
+        return health;
+    }
+
 }

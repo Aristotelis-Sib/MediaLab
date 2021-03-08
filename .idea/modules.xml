@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MediaLab.iml" filepath="$PROJECT_DIR$/MediaLab.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MediaLabExercise.iml" filepath="$PROJECT_DIR$/MediaLabExercise.iml" />
     </modules>
   </component>
 </project>
