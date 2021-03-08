@@ -273,7 +273,7 @@ public class Popup {
         popUpWindow.showAndWait();
     }
 
-    public static void displayLoad(MenuItem start)
+    public static void displayLoad(Button loadaction)
     {
         //Load scenario popup
         Stage popUpWindow=new Stage();
@@ -286,7 +286,7 @@ public class Popup {
         //"Textfield" that accepts only numbers
         NumFieldFX textField=new NumFieldFX();
         textField.setMaxWidth(60);
-        Button submit= new Button("Start");
+        Button submit= new Button("Load");
         submit.setOnAction(actionEvent -> {
             //Start button checks if an id is given
             if (!(textField.getText() != null && !textField.getText().isEmpty())) {
@@ -329,13 +329,13 @@ public class Popup {
                     if(noException){
                         //If the above are checked proceed to load and start game with new id
                         setUserInput(textField.getText());
-                        start.fire();
+                        loadaction.fire();
                         popUpWindow.close();
                     }
                 }
                 else{
                     label3.setTextFill(Color.FIREBRICK);
-                    label3.setText("Non existent id: " +textField.getText());
+                    label3.setText("Non file with id: " +textField.getText());
                 }
 
             }
@@ -365,6 +365,28 @@ public class Popup {
             });
         }
     }
+    public static void eMessage(String errorMessage){
+        //Exception popup message
+        Stage popUpWindow=new Stage();
+        popUpWindow.setMinHeight(100);
+        popUpWindow.setMinWidth(200);
+        popUpWindow.setTitle("Exception");
+        Label label= new Label(errorMessage);
+        label.setFont(new Font("Arial", 15));
+        label.setStyle("-fx-font-weight: bold;");
+        label.setAlignment(Pos.CENTER);
+
+        Button button= new Button("  Ok  ");
+        button.setOnAction(e->popUpWindow.close());
+        button.setAlignment(Pos.CENTER);
+        button.setDefaultButton(true);
+        VBox layout = new VBox(10,label,button);
+        layout.setAlignment(Pos.CENTER);
+        Scene scene1= new Scene(layout, 300, 250);
+        popUpWindow.setScene(scene1);
+        popUpWindow.showAndWait();
+    }
+
 
     public static void eMessage(String errorMessage,String extraMessage)
     {

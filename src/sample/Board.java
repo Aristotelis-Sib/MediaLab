@@ -26,7 +26,7 @@ public class Board extends Parent {
         //Create first row with numbering of columns
         for(int i=0;i<10;i++){
             if(i==0) {
-                BattleshipGame.MyNode rect= new BattleshipGame.MyNode("",30,30,Color.DARKGRAY,1);
+                BattleshipGame.MyNode rect= new BattleshipGame.MyNode("y\\x",30,30,Color.DARKGRAY,1);
                 firstRow.getChildren().add(rect);
             }
             BattleshipGame.MyNode rect= new BattleshipGame.MyNode(String.valueOf(i),30,30,Color.DARKGRAY,1);
@@ -49,7 +49,7 @@ public class Board extends Parent {
         getChildren().add(rows);
     }
 
-    public boolean placeShip(Ship ship, int x, int y,String scenarioId) {
+    public boolean placeShip(Ship ship, int x, int y,String scenarioId) throws OverlapTilesException, AdjacentTilesException, OversizeException {
         //Check if ship can be placed in the given coordinates if not custom exception is thrown
         if (canPlaceShip(ship, x, y,scenarioId)) {
             int length = ship.length;
@@ -144,7 +144,7 @@ public class Board extends Parent {
         return dict;
     }
 
-    private boolean canPlaceShip(Ship ship, int x, int y,String scenarioID) {
+    private boolean canPlaceShip(Ship ship, int x, int y,String scenarioID) throws OversizeException, OverlapTilesException, AdjacentTilesException {
         int length = ship.length;
 //        String exceptionMessage=enemy?"enemy_SCENARIO-":"player_SCENARIO-"+scenarioID+".txt at ship-type(row) " + ship.type;
         String exceptionMessage=enemy?"enemy_SCENARIO-":"player_SCENARIO-"+scenarioID+".txt \n";

@@ -1,6 +1,6 @@
 package customExceptions;
 
-public class OversizeException extends RuntimeException{
+public class OversizeException extends Exception{
     public OversizeException(String errorMessage){
         super(errorMessage);
     }

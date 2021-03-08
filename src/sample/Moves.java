@@ -12,7 +12,7 @@ public class Moves {
     protected  Deque<Board.Cell> enemyStack= new ArrayDeque<>();
     protected  Deque<Board.Cell> playerStack= new ArrayDeque<>();
     protected  HashMap<String,int[]> dict = new HashMap<>();
-    protected  int biggestShipUnsinked=5;
+    protected  int biggestShipNotSinked =5;
     protected  int contHits=0;
     protected boolean size3ship=true;
     protected boolean running = false;
@@ -20,7 +20,7 @@ public class Moves {
     protected boolean enemyTurn = false;
     protected Random random = new Random();
     private PropertyChangeSupport support= new PropertyChangeSupport(this);
-    private int numOfMoves=40;
+    protected int numOfMoves=40;
     boolean enemyStarts=false;
     public static String id;
 
@@ -33,6 +33,9 @@ public class Moves {
     }
     public int getPlayerRemMoves(){
         return numOfMoves-playerStack.size();
+    }
+    public int getEnemyRemMoves(){
+        return numOfMoves-enemyStack.size();
     }
     public int getPlayerPoints(){
         Iterator<Board.Cell> itr = playerStack.iterator();
@@ -107,56 +110,64 @@ public class Moves {
                 return;
 
             cell.shoot();
-            enemyTurn = true;
-            //Keeping on stack each shot
-            playerStack.addFirst(cell);
-            //If enemy has no more ships
-            if (enemyBoard.ships == 0) {
-                displayResults("YOU WON","All enemy ships are hit",getPlayerPoints(),getEnemyPoints());
-                initBoard(enemyBoard,"1");
-                initBoard(playerBoard,"1");
-                reset();
-                setRandomPlayer();
-            }
-            // If limit of moves reached (if player started +1 so enemy can play its 40th shot and then stop game)
-            if (playerStack.size() == numOfMoves + (enemyStarts?0:1) ) {
-                displayResults(getPlayerPoints() > getEnemyPoints() ? "YOU WON" : "YOU LOST","By points, 40 moves reached",getPlayerPoints(),getEnemyPoints());
-                initBoard(enemyBoard,"1");
-                initBoard(playerBoard,"1");
-                reset();
-                setRandomPlayer();
-            }
-            observer();
-            //Enemy turn
-            if (enemyTurn) {
-                enemyMove();
-                enemyTurn = false;
-            }
+            shotSequence(cell);
         });
     }
 
+    public void shotSequence(Board.Cell cell){
+        enemyTurn = true;
+        //Keeping on stack each shot
+        playerStack.addFirst(cell);
+        //If enemy has no more ships
+        if (enemyBoard.ships == 0) {
+            displayResults("YOU WON","All enemy ships have sunk",getPlayerPoints(),getEnemyPoints());
+            initBoard(enemyBoard,"1");
+            initBoard(playerBoard,"1");
+            reset();
+            setRandomPlayer();
+        }
+        // If limit of moves reached (if player started +1 so enemy can play its 40th shot and then stop game)
+        if (playerStack.size() == numOfMoves + (enemyStarts?0:1) ) {
+            displayResults(getPlayerPoints() > getEnemyPoints() ? "YOU WON" : "YOU LOST","By points, 40 moves reached",getPlayerPoints(),getEnemyPoints());
+            initBoard(enemyBoard,"1");
+            initBoard(playerBoard,"1");
+            reset();
+            setRandomPlayer();
+        }
+        observer();
+        //Enemy turn
+        if (enemyTurn) {
+            enemyMove();
+            enemyTurn = false;
+        }
+    }
     public void createPlayerBoard(){
         playerBoard = new Board(false, event -> {});
     }
 
-    public void initBoard(Board board,String id){
+    public void initBoard(Board board,String id) {
         board.reset(true);
         ReadFile readFile=new ReadFile();
         //Reading file and getting results in an array
         String[][] strArray=readFile.readFile2Array(board.enemy, id);
         int[] count=new int[5];
         //Check and place each ship
-        for(int i=0;i<5;i++) {
-            board.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]),id);
-            count[Integer.parseInt(strArray[i][0])-1]=1;
-        }
-        if (Arrays.stream(count).sum()!=5){
-            //InvalidCountException
-            throw new InvalidCountExeception(board.enemy?"enemy_SCENARIO-":"player_SCENARIO-"+ id+".txt\n throws InvalidCountExeception");
+        //Τry Catch to handle exceptions, but should never occur because the input file is checked from before
+        try{
+            for(int i=0;i<5;i++) {
+                board.placeShip(new Ship(strArray[i][0],strArray[i][3].equals("2")),Integer.parseInt(strArray[i][2]),Integer.parseInt(strArray[i][1]),id);
+                count[Integer.parseInt(strArray[i][0])-1]=1;
+            }
+            if (Arrays.stream(count).sum()!=5){
+                //InvalidCountException
+                throw new InvalidCountExeception(board.enemy?"enemy_SCENARIO-":"player_SCENARIO-"+ id+".txt\n throws InvalidCountException");
+            }
+        }catch (Exception e){
+            Popup.eMessage(e.getMessage());
         }
     }
     //Same as init board,but for a dummy board to check if exceptions arise
-    public static void checkBoard(String id){
+    public static void checkBoard(String id) throws OverlapTilesException, AdjacentTilesException, OversizeException, InvalidCountExeception {
         boolean enemy=false;
         for (int j=0;j<2;j++){
             Board board=new Board(enemy, event -> {});
@@ -170,7 +181,7 @@ public class Moves {
             }
             if (Arrays.stream(count).sum()!=5){
                 //InvalidCountException
-                throw new InvalidCountExeception(board.enemy?"enemy_SCENARIO-":"player_SCENARIO-"+ id+".txt\nthrows InvalidCountExeception");
+                throw new InvalidCountExeception(board.enemy?"enemy_SCENARIO-":"player_SCENARIO-"+ id+".txt\nthrows InvalidCountException");
             }
             enemy=true;
         }
@@ -186,7 +197,7 @@ public class Moves {
         dict.put("r", null);
     }
 
-    private void enemyMove() {
+    protected void enemyMove() {
         while (enemyTurn) {
             Board.Cell cell=null;
             boolean shot=false;
@@ -249,7 +260,7 @@ public class Moves {
                     //if no hit no more shots in this "direction"
                     dict.put(key, null);
                 }else{
-                    //Coun how many hits we have on particular ship (zeros when we hit randomly again), when we hit
+                    //Count how many hits we have on particular ship (zeros when we hit randomly again), when we hit
                     //a ship we shoot specifically until it is sinked and then randomly again
                     contHits++;
                     //Zero keys on wrong orientation of ship
@@ -264,16 +275,16 @@ public class Moves {
                     }
                 }
                 //Knowing biggest ship possible we can stop hitting earlier
-                if(contHits==biggestShipUnsinked){
+                if(contHits== biggestShipNotSinked){
                     dict.put("u", null);
                     dict.put("d", null);
                     dict.put("l", null );
                     dict.put("r", null);
                     //if biggest ship sank we then know maximum hits needed based on second biggest ship
-                    biggestShipUnsinked--;
+                    biggestShipNotSinked--;
                     //special case for size/health 3, we have 2 ships with this size/health
-                    if(size3ship && biggestShipUnsinked==2){
-                        biggestShipUnsinked++;
+                    if(size3ship && biggestShipNotSinked ==2){
+                        biggestShipNotSinked++;
                         size3ship=false;
                     }
                 }
@@ -323,7 +334,7 @@ public class Moves {
             enemyTurn = false;
 
             if (playerBoard.ships == 0) {
-                displayResults("YOU LOST","All of your ships are sinked",getPlayerPoints(),getEnemyPoints());
+                displayResults("YOU LOST","All of your ships are sunk",getPlayerPoints(),getEnemyPoints());
                 initBoard(enemyBoard,"1");
                 initBoard(playerBoard,"1");
                 reset();
