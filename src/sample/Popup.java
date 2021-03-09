@@ -4,10 +4,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -38,10 +36,10 @@ public class Popup {
         Stage popUpWindow=new Stage();
         popUpWindow.initModality(Modality.APPLICATION_MODAL);
         popUpWindow.initOwner(BattleshipGame.root.getScene().getWindow());
-        popUpWindow.setMinHeight(450);
-        popUpWindow.setMinWidth(450);
-        popUpWindow.setMaxHeight(800);
-        popUpWindow.setMaxWidth(800);
+        popUpWindow.setMinHeight(550);
+        popUpWindow.setMinWidth(550);
+        popUpWindow.setMaxHeight(900);
+        popUpWindow.setMaxWidth(900);
         popUpWindow.setTitle("Enemy Ships");
         Label label= new Label("Enemy Ships Status is:");
         label.setFont(new Font("Arial", 20));
@@ -54,38 +52,51 @@ public class Popup {
     }
 
 
-    public static HBox getShips(Board board){
+    public static VBox getShips(Board board){
         double gridWidth = 150;
         double gridHeight = 50;
 
         Color infoColor=Color.CYAN;
         Color dataColor=Color.WHITE;
+        Color hitColor=Color.ORANGE;
         Color sinkColor=Color.GREEN;
         BattleshipGame.MyNode info0= new BattleshipGame.MyNode( "Ship Type", gridWidth*1.4, gridHeight,infoColor);
         BattleshipGame.MyNode info1 = new BattleshipGame.MyNode( "Hits/Size", gridWidth, gridHeight,infoColor);
 
         BattleshipGame.MyNode carrierName = new BattleshipGame.MyNode( "Carrier", gridWidth*1.4, gridHeight,infoColor);
-        BattleshipGame.MyNode carrier= new BattleshipGame.MyNode(5-board.shipArray[0].getHealth()+"/5" , gridWidth, gridHeight,board.shipArray[0].getHealth()==0?sinkColor:dataColor);
+        BattleshipGame.MyNode carrier= new BattleshipGame.MyNode(5-board.shipArray[0].getHealth()+"/5" , gridWidth, gridHeight,board.shipArray[0].getHealth()==0?sinkColor:(board.shipArray[0].getHealth()==5?dataColor:hitColor));
 
         BattleshipGame.MyNode battleshipName = new BattleshipGame.MyNode( "Battleship", gridWidth*1.4, gridHeight,infoColor);
-        BattleshipGame.MyNode battleship = new BattleshipGame.MyNode( 4-board.shipArray[1].getHealth()+"/4" , gridWidth, gridHeight,board.shipArray[1].getHealth()==0?sinkColor:dataColor);
+        BattleshipGame.MyNode battleship = new BattleshipGame.MyNode( 4-board.shipArray[1].getHealth()+"/4" , gridWidth, gridHeight,board.shipArray[1].getHealth()==0?sinkColor:(board.shipArray[1].getHealth()==4?dataColor:hitColor));
 
         BattleshipGame.MyNode cruiserName = new BattleshipGame.MyNode( "Cruiser", gridWidth*1.4, gridHeight,infoColor);
-        BattleshipGame.MyNode cruiser = new BattleshipGame.MyNode( 3-board.shipArray[2].getHealth()+"/3"  , gridWidth, gridHeight,board.shipArray[2].getHealth()==0?sinkColor:dataColor);
+        BattleshipGame.MyNode cruiser = new BattleshipGame.MyNode( 3-board.shipArray[2].getHealth()+"/3"  , gridWidth, gridHeight,board.shipArray[2].getHealth()==0?sinkColor:(board.shipArray[2].getHealth()==3?dataColor:hitColor));
 
         BattleshipGame.MyNode submarineName = new BattleshipGame.MyNode( "Submarine", gridWidth*1.4, gridHeight,infoColor);
-        BattleshipGame.MyNode submarine = new BattleshipGame.MyNode(3-board.shipArray[3].getHealth()+"/3"  , gridWidth, gridHeight,board.shipArray[3].getHealth()==0?sinkColor:dataColor);
+        BattleshipGame.MyNode submarine = new BattleshipGame.MyNode(3-board.shipArray[3].getHealth()+"/3"  , gridWidth, gridHeight,board.shipArray[3].getHealth()==0?sinkColor:(board.shipArray[3].getHealth()==3?dataColor:hitColor));
 
         BattleshipGame.MyNode destroyerName = new BattleshipGame.MyNode( "Destroyer", gridWidth*1.4, gridHeight,infoColor);
-        BattleshipGame.MyNode destroyer = new BattleshipGame.MyNode( 2-board.shipArray[4].getHealth()+"/2" , gridWidth, gridHeight,board.shipArray[4].getHealth()==0?sinkColor:dataColor);
+        BattleshipGame.MyNode destroyer = new BattleshipGame.MyNode( 2-board.shipArray[4].getHealth()+"/2" , gridWidth, gridHeight,board.shipArray[4].getHealth()==0?sinkColor:(board.shipArray[4].getHealth()==2?dataColor:hitColor));
+
+        BattleshipGame.MyNode healthy = new BattleshipGame.MyNode( "Not hit", gridWidth*0.797, gridHeight,dataColor);
+        BattleshipGame.MyNode hit = new BattleshipGame.MyNode( "Hit" , gridWidth*0.797, gridHeight,hitColor);
+        BattleshipGame.MyNode sunk = new BattleshipGame.MyNode( "Sunk" , gridWidth*0.797, gridHeight,sinkColor);
 
         VBox column1 = new VBox(info0,carrierName,battleshipName,cruiserName,submarineName,destroyerName);
         column1.setAlignment(Pos.CENTER);
         VBox column2 = new VBox( info1,carrier,battleship,cruiser,submarine,destroyer);
         column2.setAlignment(Pos.CENTER);
+        HBox shipConditionColors=new HBox(-1,healthy,hit,sunk);
+        shipConditionColors.setAlignment(Pos.CENTER);
+
         HBox shipsStats = new HBox(column1,column2);
         shipsStats .setAlignment(Pos.CENTER);
-        return shipsStats;
+
+        VBox shipShotsTable=new VBox(shipsStats,shipConditionColors);
+        shipShotsTable.setAlignment(Pos.CENTER);
+        return shipShotsTable;
+
+//        return shipsStats;
     }
 
     public static void displayShots(Deque<Board.Cell> stack,boolean isPlayer)

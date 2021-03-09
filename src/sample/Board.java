@@ -50,7 +50,7 @@ public class Board extends Parent {
     }
 
     public boolean placeShip(Ship ship, int x, int y,String scenarioId) throws OverlapTilesException, AdjacentTilesException, OversizeException {
-        //Check if ship can be placed in the given coordinates if not custom exception is thrown
+        //Check if ship can be placed in the given coordinates, if not custom exception is thrown
         if (canPlaceShip(ship, x, y,scenarioId)) {
             int length = ship.length;
             //Assign ship to corresponding cells
@@ -230,11 +230,11 @@ public class Board extends Parent {
         private Board board;
 
         /**
-         * Square subarea or part of Board with specific coordinates (x,y) on the board
-         * and default color set to gray.Where x is in horizontal direction and y in vertical.
+         * Square subarea (extends rectangle) or part of Board with specific coordinates (x,y)
+         * with default color set to gray and size 30x30 .Where x is in horizontal direction and y in vertical.
          *
-         * @param x         Specifies the x-coordinate of the board at which the cell corresponds. Measured in pixels
-         * @param y         Specifies the y-coordinate of the board at which the cell corresponds. Measured in pixels.
+         * @param x         Specifies the x-coordinate of the board at which the cell corresponds. Measured in pixels/discrete boxes
+         * @param y         Specifies the y-coordinate of the board at which the cell corresponds. Measured in pixels/discrete boxes
          * @param board     The board in which the cell belongs
          */
         public Cell(int x, int y, Board board) {
